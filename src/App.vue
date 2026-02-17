@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Todos from './components/Todos.vue'
+import PickleComponent from './components/PickleComponent.vue'
 </script>
 
 <template>
   <main>
-    <Todos />
+    <PickleComponent />
   </main>
 </template>
 
