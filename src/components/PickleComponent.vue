@@ -45,9 +45,12 @@ async function changeAffirmation() {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   padding: 2rem;
   background: radial-gradient(circle at top right, #1a1a1a 0%, #000000 100%);
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .pickle-card {
@@ -60,6 +63,7 @@ async function changeAffirmation() {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   max-width: 500px;
   width: 100%;
+  box-sizing: border-box;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -75,6 +79,7 @@ async function changeAffirmation() {
 
 .pickle-image {
   width: 200px;
+  max-width: 100%;
   height: auto;
   border-radius: 16px;
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
@@ -88,7 +93,8 @@ async function changeAffirmation() {
 
 .affirmation-text {
   font-family: 'Outfit', sans-serif;
-  font-size: 2rem;
+  font-size: 20px; /* Base for scale */
+  font-size: clamp(1.2rem, 5vw, 2rem);
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 2rem;
@@ -96,9 +102,10 @@ async function changeAffirmation() {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   min-height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .primary-button {
@@ -146,5 +153,35 @@ async function changeAffirmation() {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@media (max-width: 440px) {
+  .pickle-container {
+    padding: 1rem;
+  }
+
+  .pickle-card {
+    padding: 2rem 1rem;
+    border-radius: 16px;
+    width: 100%;
+    max-width: calc(100vw - 2rem); /* Hard limit */
+  }
+
+  .pickle-image {
+    width: 140px;
+  }
+
+  .affirmation-text {
+    font-size: 1.25rem;
+    min-height: 3.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .primary-button {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 100%;
+  }
 }
 </style>
