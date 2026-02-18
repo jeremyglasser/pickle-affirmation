@@ -50,9 +50,6 @@ export function useGemini() {
       const message = err instanceof Error ? err : new Error(String(err));
       console.error("Gemini Request Failed. Using fallback affirmation.", message);
 
-      // Set error state so the UI can at least know something happened
-      error.value = message;
-
       // Select a random fallback
       const fallback = CANNED_AFFIRMATIONS[Math.floor(Math.random() * CANNED_AFFIRMATIONS.length)];
       result.value = fallback;

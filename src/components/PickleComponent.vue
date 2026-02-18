@@ -24,7 +24,6 @@ async function changeAffirmation() {
       <div class="image-wrapper">
         <img src="/pickle.png" alt="Pickle" class="pickle-image" />
       </div>
-      <div v-if="error" class="error-message">{{ error.message }}</div>
       <h1 class="affirmation-text">
         <span v-if="loading" class="pulse">Thinking...</span>
         <span v-else>{{ affirmation }}</span>
@@ -34,7 +33,7 @@ async function changeAffirmation() {
         class="primary-button"
         :disabled="loading"
       >
-        {{ loading ? 'Generating...' : 'Get New AI Affirmation' }}
+        {{ loading ? 'Generating...' : 'Ask Pickle for Affirmation' }}
       </button>
     </div>
   </div>
