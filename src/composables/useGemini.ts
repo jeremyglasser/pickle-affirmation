@@ -35,7 +35,7 @@ export function useGemini() {
    * Specifically generates a pickle-themed affirmation.
    */
   async function generatePickleAffirmation() {
-    const prompt = "Give me a short, witty, and encouraging pickle-themed affirmation. Under 15 words.";
+    const prompt = "Generate a new affirmation.";
     return await generate(prompt);
   }
 
