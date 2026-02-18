@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@google/genai": "^1.41.0",
     "aws-amplify": "^6.6.6",
     "vue": "^3.4.21"
   },

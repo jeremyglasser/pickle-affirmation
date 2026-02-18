@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useGemini } from '../composables/useGemini';
 
+const { loading, error, generatePickleAffirmation } = useGemini();
 const affirmation = ref("You're doing great, Pickle!");
 
-const affirmations = [
-  "You're kind of a big dill!",
-  "Stay cool as a cucumber.",
-  "You're simply smashing!",
-  "Pickle power!",
-  "Everything is going to be just vine.",
-  "You're the zest!",
-];
-
-function changeAffirmation() {
-  const randomIndex = Math.floor(Math.random() * affirmations.length);
-  affirmation.value = affirmations[randomIndex];
+async function changeAffirmation() {
+  try {
+    const result = await generatePickleAffirmation();
+    if (result) {
+      affirmation.value = result;
+    }
+  } catch (err) {
+    // Fallback if AI fails
+    affirmation.value = "You're still a big dill, even if I'm shy right now!";
+  }
 }
 </script>
 
@@ -24,9 +24,17 @@ function changeAffirmation() {
       <div class="image-wrapper">
         <img src="/pickle.png" alt="Pickle" class="pickle-image" />
       </div>
-      <h1 class="affirmation-text">{{ affirmation }}</h1>
-      <button @click="changeAffirmation" class="primary-button">
-        Get New Affirmation
+      <div v-if="error" class="error-message">{{ error.message }}</div>
+      <h1 class="affirmation-text">
+        <span v-if="loading" class="pulse">Thinking...</span>
+        <span v-else>{{ affirmation }}</span>
+      </h1>
+      <button
+        @click="changeAffirmation"
+        class="primary-button"
+        :disabled="loading"
+      >
+        {{ loading ? 'Generating...' : 'Get New AI Affirmation' }}
       </button>
     </div>
   </div>
@@ -114,5 +122,30 @@ function changeAffirmation() {
 
 .primary-button:active {
   transform: scale(0.98);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 </style>
