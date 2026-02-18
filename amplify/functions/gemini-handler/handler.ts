@@ -1,6 +1,14 @@
 import type { Handler } from "aws-lambda";
 import { GoogleGenAI } from "@google/genai";
-import { env } from "$amplify/env/gemini-handler";
+
+// We define the type for environment variables locally to avoid
+// build-time resolution issues with the auto-generated $amplify alias.
+interface AmplifyEnv {
+  GEMINI_API_KEY: string;
+  GEMINI_MODEL?: string;
+}
+
+const env = process.env as unknown as AmplifyEnv;
 
 export const handler: Handler = async (event) => {
   const { prompt } = event.arguments || (typeof event === 'string' ? JSON.parse(event) : event);
