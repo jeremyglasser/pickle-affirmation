@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { geminiService } from "../services/geminiService";
+import { logger } from "../utils/logger";
 
 const CANNED_AFFIRMATIONS = [
   "You are more capable than you know.",
@@ -94,7 +95,7 @@ export function useGemini() {
 
     } catch (err) {
       const message = err instanceof Error ? err : new Error(String(err));
-      console.error("Gemini/Dynamo Request Failed. Using fallback affirmation.", message);
+      logger.error("Gemini/Dynamo Request Failed. Using fallback affirmation.", message);
 
       // Select a random fallback from canned pool ONLY
       const pool = CANNED_AFFIRMATIONS.filter(a => typeof a === 'string');

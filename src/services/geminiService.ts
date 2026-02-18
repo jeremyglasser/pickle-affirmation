@@ -1,5 +1,6 @@
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
+import { logger } from "../utils/logger";
 
 /**
  * Service to interact with the Gemini AI mutation via AWS Amplify Data.
@@ -20,7 +21,7 @@ export class GeminiService {
       });
 
       if (errors) {
-        console.error("Amplify Mutation Errors:", errors);
+        logger.error("Amplify Mutation Errors:", errors);
         throw new Error(errors[0].message || "Failed to generate affirmation through Amplify");
       }
 
@@ -30,7 +31,7 @@ export class GeminiService {
 
       return data;
     } catch (error) {
-      console.error("Gemini Service Error:", error);
+      logger.error("Gemini Service Error:", error);
       throw error;
     }
   }
@@ -43,7 +44,7 @@ export class GeminiService {
       const { data } = await this.client.models.DailyAffirmation.list();
       return data || [];
     } catch (error) {
-      console.error("Error listing all affirmations:", error);
+      logger.error("Error listing all affirmations:", error);
       return [];
     }
   }
@@ -58,7 +59,7 @@ export class GeminiService {
         affirmation,
       });
     } catch (error) {
-      console.error("Error saving daily affirmation:", error);
+      logger.error("Error saving daily affirmation:", error);
     }
   }
 }
