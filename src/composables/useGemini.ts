@@ -24,6 +24,11 @@ const CANNED_AFFIRMATIONS = [
   "You are destined for great things. Trust the process."
 ];
 
+// Shared state across all instances of the composable to avoid redundant DynamoDB checks
+const allHistoricalAffirmations = ref<string[]>([]);
+const todayAffirmation = ref<string | null>(null);
+const hasCheckedDynamo = ref(false);
+
 /**
  * Vue composable for interacting with the Gemini AI service.
  * Follows Vue 3 Composition API best practices for state management.
@@ -35,23 +40,65 @@ export function useGemini() {
 
   /**
    * Sends a prompt to Gemini and updates the reactive state.
-   * If the request fails, returns a random canned affirmation as a fallback.
-   * @param prompt The prompt string to send.
+   * Workflow:
+   * 1. Pull ALL affirmations from Dynamo.
+   * 2. If nothing exists for today, generate and save a new record.
+   * 3. For subsequent requests, pick from ALL historical + canned at random.
    */
   async function generate(prompt: string) {
     loading.value = true;
     error.value = null;
 
+    const today = new Date().toISOString().split('T')[0];
+
     try {
-      const response = await geminiService.generateText(prompt);
-      result.value = response;
-      return response;
+      // 1. Pull ALL affirmations if we haven't yet
+      if (!hasCheckedDynamo.value) {
+        const cached = await geminiService.listAllAffirmations();
+        if (cached && cached.length > 0) {
+          allHistoricalAffirmations.value = cached.map(c => c.affirmation);
+
+          // Check if today exists specifically
+          const todayMatch = cached.find(c => c.date === today);
+          if (todayMatch) {
+            todayAffirmation.value = todayMatch.affirmation;
+          }
+        }
+        hasCheckedDynamo.value = true;
+      }
+
+      // 2. If no affirmation for today, generate, save, and update pool
+      if (!todayAffirmation.value) {
+        const response = await geminiService.generateText(prompt);
+        await geminiService.saveDailyAffirmation(today, response);
+
+        todayAffirmation.value = response;
+        allHistoricalAffirmations.value.push(response);
+
+        result.value = response;
+        return response;
+      }
+
+      // 3. For subsequent clicks (or if today was already found during initial load):
+      // Return today's affirmation if this is the first interaction in this lifecycle,
+      // otherwise pick randomly from the growing historical pool + canned.
+      if (!result.value) {
+        result.value = todayAffirmation.value;
+        return todayAffirmation.value;
+      }
+
+      const pool = [...allHistoricalAffirmations.value, ...CANNED_AFFIRMATIONS.filter(a => typeof a === 'string')];
+      const randomAff = pool[Math.floor(Math.random() * pool.length)];
+      result.value = randomAff;
+      return randomAff;
+
     } catch (err) {
       const message = err instanceof Error ? err : new Error(String(err));
-      console.error("Gemini Request Failed. Using fallback affirmation.", message);
+      console.error("Gemini/Dynamo Request Failed. Using fallback affirmation.", message);
 
-      // Select a random fallback
-      const fallback = CANNED_AFFIRMATIONS[Math.floor(Math.random() * CANNED_AFFIRMATIONS.length)];
+      // Select a random fallback from canned pool ONLY
+      const pool = CANNED_AFFIRMATIONS.filter(a => typeof a === 'string');
+      const fallback = pool[Math.floor(Math.random() * pool.length)];
       result.value = fallback;
       return fallback;
     } finally {

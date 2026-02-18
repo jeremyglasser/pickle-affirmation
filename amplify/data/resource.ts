@@ -14,6 +14,14 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
+  DailyAffirmation: a
+    .model({
+      date: a.id().required(),
+      affirmation: a.string().required(),
+    })
+    .identifier(['date'])
+    .authorization((allow) => [allow.publicApiKey()]),
+
   generateAffirmation: a
     .mutation()
     .arguments({

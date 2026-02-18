@@ -34,6 +34,33 @@ export class GeminiService {
       throw error;
     }
   }
+
+  /**
+   * Fetches all historical affirmations from the database.
+   */
+  async listAllAffirmations(): Promise<{ date: string; affirmation: string }[]> {
+    try {
+      const { data } = await this.client.models.DailyAffirmation.list();
+      return data || [];
+    } catch (error) {
+      console.error("Error listing all affirmations:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Saves a single affirmation for a specific date.
+   */
+  async saveDailyAffirmation(date: string, affirmation: string): Promise<void> {
+    try {
+      await this.client.models.DailyAffirmation.create({
+        date,
+        affirmation,
+      });
+    } catch (error) {
+      console.error("Error saving daily affirmation:", error);
+    }
+  }
 }
 
 // Export a singleton instance
