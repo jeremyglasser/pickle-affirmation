@@ -39,9 +39,6 @@ For backend functions (like the Auth pre-sign-up trigger) and the bridged enviro
 npx ampx sandbox secret set GEMINI_API_KEY
 npx ampx sandbox secret set GEMINI_MODEL
 
-# Required for Admin access control
-npx ampx sandbox secret set ADMIN_WHITELIST
-
 # Optional / Project Metadata
 npx ampx sandbox secret set GEMINI_PROJECT_NUMBER
 ```
