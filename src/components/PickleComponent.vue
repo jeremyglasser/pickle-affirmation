@@ -2,18 +2,26 @@
 import { ref } from 'vue';
 import { useGemini } from '../composables/useGemini';
 
-const { loading, error, generatePickleAffirmation } = useGemini();
-const affirmation = ref("You're doing great, Pickle!");
+const props = defineProps({
+  type: {
+    type: String,
+    default: 'affirmation'
+  }
+});
 
-async function changeAffirmation() {
+const { loading, error, generatePickleAffirmation, generateJoke } = useGemini();
+const message = ref(props.type === 'joke' ? "Ready for a big dill joke?" : "You're doing great, Pickle!");
+
+async function handleAction() {
   try {
-    const result = await generatePickleAffirmation();
+    const result = props.type === 'joke' ? await generateJoke() : await generatePickleAffirmation();
     if (result) {
-      affirmation.value = result;
+      message.value = result;
     }
   } catch (err) {
-    // Fallback if AI fails
-    affirmation.value = "You're still a big dill, even if I'm shy right now!";
+    message.value = props.type === 'joke' 
+      ? "I relished the moment to share this joke!"
+      : "You're still a big dill, even if I'm shy right now!";
   }
 }
 </script>
@@ -26,14 +34,14 @@ async function changeAffirmation() {
       </div>
       <h1 class="affirmation-text">
         <span v-if="loading" class="pulse">Thinking...</span>
-        <span v-else>{{ affirmation }}</span>
+        <span v-else>{{ message }}</span>
       </h1>
       <button
-        @click="changeAffirmation"
+        @click="handleAction"
         class="primary-button"
         :disabled="loading"
       >
-        {{ loading ? 'Generating...' : 'Ask Pickle for Affirmation' }}
+        {{ loading ? 'Generating...' : (props.type === 'joke' ? 'Ask Pickle for a Joke' : 'Ask Pickle for Affirmation') }}
       </button>
     </div>
   </div>

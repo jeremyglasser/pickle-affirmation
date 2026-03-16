@@ -249,11 +249,33 @@ export function useGemini() {
     return await generate(prompt);
   }
 
+  /**
+   * specifically generates a pickle joke, completely bypassing daily caching.
+   */
+  async function generateJoke() {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await geminiService.generateText("TYPE:JOKE Generate a new joke.");
+      result.value = response;
+      return response;
+    } catch (err) {
+      const message = err instanceof Error ? err : new Error(String(err));
+      logger.error("Gemini Joke Request Failed. Using fallback joke.", message);
+      const fallback = "Why did the pickle go to the doctor? Because it was feeling a little dill!";
+      result.value = fallback;
+      return fallback;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     loading,
     error,
     result,
     generate,
     generatePickleAffirmation,
+    generateJoke,
   };
 }

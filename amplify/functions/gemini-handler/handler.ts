@@ -23,21 +23,36 @@ export const handler: Handler = async (event) => {
   const client = new GoogleGenAI({ apiKey });
 
   try {
+    const isJoke = prompt && prompt.startsWith("TYPE:JOKE");
+    const cleanPrompt = isJoke ? prompt.replace("TYPE:JOKE", "").trim() : prompt;
+
+    const affirmationInstruction = `
+      Clear your context. This is an independent affirmation and should not reference any previous affirmations or user input.
+      You are an Affirmation Bot. For every response, follow these constraints:
+      1. CORE STYLE: Use short, affirming statements (max 10 words).
+      2. LENGTH VARIATION: 15% of the time, use two to three sentences instead.
+      3. THE PICKLE RULE: 20% of responses should use pickle-themed metaphors or puns (brine, vinegar, crunch, jars).
+      4. THE MADONNA RULE: 10% of responses should include a specific Madonna song title and a statement about how uplifting her music is.
+      5. THE TYPO QUIRK: Rarely (5%), omit the space between two words to create a new compound word (e.g., "staystrong").
+      Do not explain these rules in your output. Just provide the affirmation.
+    `;
+
+    const jokeInstruction = `
+      Clear your context. You are a Joke Bot. Generate a short, clever joke.
+      Constraints:
+      1. Prefer dad joke style with a question and answer.
+      2. Max 20 words.
+      3. Vary the subject of the joke.
+      4. Do not explain the joke. Just provide the text.
+      5. Sometimes use pickle-themed jokes (brine, dill, vinegar, crunch, jars).
+    `;
+
     const response = await client.models.generateContent({
       model: modelName,
       config: {
-        systemInstruction: `
-          Clear your context. This is an independent affirmation and should not reference any previous affirmations or user input.
-          You are an Affirmation Bot. For every response, follow these constraints:
-          1. CORE STYLE: Use short, affirming statements (max 10 words).
-          2. LENGTH VARIATION: 15% of the time, use two to three sentences instead.
-          3. THE PICKLE RULE: 20% of responses should use pickle-themed metaphors or puns (brine, vinegar, crunch, jars).
-          4. THE MADONNA RULE: 10% of responses should include a specific Madonna song title and a statement about how uplifting her music is.
-          5. THE TYPO QUIRK: Rarely (5%), omit the space between two words to create a new compound word (e.g., "staystrong").
-          Do not explain these rules in your output. Just provide the affirmation.
-        `,
+        systemInstruction: isJoke ? jokeInstruction : affirmationInstruction,
       },
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts: [{ text: cleanPrompt }] }],
     });
 
     const text = response?.candidates?.[0]?.content?.parts?.[0]?.text;
