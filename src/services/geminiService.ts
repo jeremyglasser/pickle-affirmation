@@ -37,29 +37,39 @@ export class GeminiService {
   }
 
   /**
-   * Fetches all historical affirmations from the database.
+   * Fetches all historical data from the database.
    */
-  async listAllAffirmations(): Promise<{ date: string; affirmation: string }[]> {
+  async listAllData(): Promise<{ date: string; affirmation?: string | null; joke?: string | null }[]> {
     try {
       const { data } = await this.client.models.DailyAffirmation.list();
       return data || [];
     } catch (error) {
-      logger.error("Error listing all affirmations:", error);
+      logger.error("Error listing all data:", error);
       return [];
     }
   }
 
   /**
-   * Saves a single affirmation for a specific date.
+   * Saves a single affirmation or joke for a specific date.
    */
-  async saveDailyAffirmation(date: string, affirmation: string): Promise<void> {
+  async saveDailyContent(date: string, property: 'affirmation' | 'joke', text: string): Promise<void> {
     try {
-      await this.client.models.DailyAffirmation.create({
-        date,
-        affirmation,
-      });
+      const { data: existing } = await this.client.models.DailyAffirmation.get({ date });
+      
+      if (existing) {
+        await this.client.models.DailyAffirmation.update({
+          date,
+          affirmation: property === 'affirmation' ? text : existing.affirmation,
+          joke: property === 'joke' ? text : existing.joke,
+        });
+      } else {
+        await this.client.models.DailyAffirmation.create({
+          date,
+          [property]: text,
+        });
+      }
     } catch (error) {
-      logger.error("Error saving daily affirmation:", error);
+      logger.error(`Error saving daily ${property}:`, error);
     }
   }
 }

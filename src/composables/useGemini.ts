@@ -162,7 +162,129 @@ const CANNED_AFFIRMATIONS = [
 // Shared state across all instances of the composable to avoid redundant DynamoDB checks
 const allHistoricalAffirmations = ref<string[]>([]);
 const todayAffirmation = ref<string | null>(null);
+
+const allHistoricalJokes = ref<string[]>([]);
+const todayJoke = ref<string | null>(null);
+
 const hasCheckedDynamo = ref(false);
+
+const CANNED_JOKES = [
+  "Why did the pickle go to the doctor? Because it was feeling a little dill!",
+  "What do you call a genius pickle? A brine-iac!",
+  "Why are pickles so bad at understanding jokes? Because they're a little sour.",
+  "What is a pickle's favorite TV show? Dill or No Dill.",
+  "What's a pickle's favorite instrument? The pickle-o!",
+  // The Classics (Short & Punchy)
+  "I’m afraid for the calendar. Its days are numbered.",
+  "My wife said I should do lunges to stay in shape. That would be a big step forward.",
+  "Why do skeletons stays so calm? Because nothing gets under their skin.",
+  "I used to be a baker, but I couldn't make enough dough.",
+  "What do you call a fake noodle? An impasta.",
+  "Why don’t scientists trust atoms? Because they make up everything.",
+  "I’m reading a book on anti-gravity. It’s impossible to put down.",
+  "Did you hear about the guy who invented the Lifesaver? They say he made a mint.",
+  "I used to play piano by ear, but now I use my hands.",
+  "What’s the best thing about Switzerland? I don’t know, but the flag is a big plus.",
+  // Professional & Workplace Humor
+  "Why did the scarecrow win an award? Because he was outstanding in his field.",
+  "I told my boss that three people were following me. He asked who. I said, \"Twitter, Facebook, and Instagram.\"",
+  "Why did the M&M go to school? He wanted to be a Smartie.",
+  "My tailor is happy to make me a new suit. Or so he seams.",
+  "What do you call a factory that sells passable products? A satisfactory.",
+  "How does a penguin build its house? Igloos it together.",
+  "I’m on a whiskey diet. I’ve lost three days already.",
+  "Why was the belt arrested? For holding up a pair of pants.",
+  "I have a joke about chemistry, but I don’t think it’ll get a reaction.",
+  "What do you call someone with no body and no nose? Nobody knows.",
+  // Animal Antics
+  "What do you call a fish wearing a bowtie? Sofishticated.",
+  "Why do cows wear bells? Because their horns don’t work.",
+  "What do you call a bear with no teeth? A gummy bear.",
+  "A dog walked into a flea market and stole the show.",
+  "What do you call a sleeping dinosaur? A dino-snore.",
+  "Why don’t seagulls fly over the bay? Because then they’d be bagels.",
+  "What do you call a pig that knows karate? A pork chop.",
+  "How do you make a goldfish age? Take away the 'g.'",
+  "Why are frogs so happy? They eat whatever bugs them.",
+  "What do you call an alligator in a vest? An investigator.",
+  // Food for Thought
+  "I’m so good at sleeping that I can do it with my eyes closed.",
+  "What do you call cheese that isn't yours? Nacho cheese.",
+  "Why did the grape stop in the middle of the road? Because he ran out of juice.",
+  "I’m worried about the guy who fell into the upholstery machine. He’s fully recovered now.",
+  "Want to hear a joke about a pizza? Never mind, it’s too cheesy.",
+  "Why did the tomato turn red? Because it saw the salad dressing.",
+  "What do you call a pile of kittens? A meowntain.",
+  "Why do coffee beans get in trouble? Because they’re always grounded.",
+  "What did the sushi say to the bee? Wasabi!",
+  "I wouldn't buy anything with Velcro. It's a total rip-off.",
+  // Tech & Science Puns
+  "Why was the computer cold? It left its Windows open.",
+  "How many tickles does it take to make an octopus laugh? Ten-tickles.",
+  "What is a computer's favorite snack? Microchips.",
+  "Why did the man put his money in the freezer? He wanted cold hard cash.",
+  "A termite walks into a bar and asks, 'Is the bar tender here?'",
+  "What do you call a line of men waiting to get haircuts? A barbecue.",
+  "Why can’t you hear a pterodactyl go to the bathroom? Because the 'p' is silent.",
+  "I have a lot of jokes about unemployed people, but none of them work.",
+  "Parallel lines have so much in common. It’s a shame they’ll never meet.",
+  "What did the ocean say to the beach? Nothing, it just waved.",
+  // The "Groaners" (Commit to the Bit)
+  "I’m only friends with 25 letters of the alphabet. I don’t know Y.",
+  "How do you find Will Smith in the snow? You look for the Fresh Prints.",
+  "Why did the bullet lose its job? It got fired.",
+  "I was going to tell a joke about time travel, but you guys didn’t like it.",
+  "What did the zero say to the eight? 'Nice belt!'",
+  "Why was the math book sad? It had too many problems.",
+  "What do you call a can opener that doesn’t work? A can’t opener.",
+  "I was wondering why the frisbee kept getting bigger. Then it hit me.",
+  "I’ve just written a song about tortillas. Actually, it’s more of a rap.",
+  "Did you hear about the guy who dipped his 100-dollar bill in gum? He wanted to have some extra 'chew-la.'",
+  // Adventure & The Great Outdoors
+  "What kind of tree fits in your hand? A palm tree.",
+  "Why are mountains so funny? Because they’re hill-areas.",
+  "What do you call a map guide who can't find his way? A lost cause.",
+  "How do you organize a space party? You planet.",
+  "What do you call a beehive without an exit? Unbelievable.",
+  "Why did the golfer bring two pairs of pants? In case he got a hole in one.",
+  "I’m not a fan of spring cleaning. I prefer to let things leaf.",
+  "Why did the bicycle fall over? Because it was two-tired.",
+  "What did one plate say to the other plate? Dinner is on me.",
+  "What’s blue and smells like red paint? Blue paint.",
+  // Music & Arts
+  "What’s a skeleton's favorite instrument? A trom-bone.",
+  "Why did the musician get kicked out of the library? He was being too sharp.",
+  "I’m practicing for a 'hide and seek' tournament. It’s going well, but good players are hard to find.",
+  "Why was the artist so bad at drawing? He couldn't find his perspective.",
+  "What do you call a singing laptop? A Dell.",
+  "What’s a pirate’s favorite letter? You’d think it’s R, but his first love is the C.",
+  "Why did the picture go to jail? It was framed.",
+  "What do you call a fake stone in Ireland? A sham-rock.",
+  "How do you make a tissue dance? You put a little boogie in it.",
+  "Why did the hipster burn his tongue? He drank his coffee before it was cool.",
+  // Around the House
+  "Why did the broom miss the meeting? It overswept.",
+  "What do you call a guy with a rubber toe? Roberto.",
+  "I’m on a new diet where I only eat things that start with the letter 'P.' Pizza, Pasta, Pancakes... and Prozac.",
+  "Why don't skeletons ever go trick-or-treating? They have no body to go with.",
+  "What kind of car does an egg drive? A Yolkswagon.",
+  "I used to hate facial hair, but then it grew on me.",
+  "What do you call a boomerang that won’t come back? A stick.",
+  "Why did the man name his dogs Rolex and Timex? Because they were watch dogs.",
+  "How do you tell the difference between an alligator and a crocodile? You will see one later and one in a while.",
+  "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+  // The Grand Finale
+  "What do you call a cold dog? A chili dog.",
+  "I thought about starting a business selling clones. But I realized I’d just be making a name for myself.",
+  "Why do ducks have feathers? To cover their butt-quacks.",
+  "Why did the orange stop? It ran out of zest.",
+  "What do you call a funny mountain? Hill-arious.",
+  "I’m reading a book about mazes. I got lost in it.",
+  "Why are elevator jokes so good? They work on many levels.",
+  "What do you call a man who can’t stand? Neil.",
+  "What do you call a person who polishes stairs? A step-ladder.",
+  "If you see a robbery at an Apple Store, does that make you an iWitness?",
+];
 
 /**
  * Vue composable for interacting with the Gemini AI service.
@@ -175,65 +297,63 @@ export function useGemini() {
 
   /**
    * Sends a prompt to Gemini and updates the reactive state.
-   * Workflow:
-   * 1. Pull ALL affirmations from Dynamo.
-   * 2. If nothing exists for today, generate and save a new record.
-   * 3. For subsequent requests, pick from ALL historical + canned at random.
    */
-  async function generate(prompt: string) {
+  async function generate(prompt: string, type: 'affirmation' | 'joke' = 'affirmation') {
     loading.value = true;
     error.value = null;
 
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      // 1. Pull ALL affirmations if we haven't yet
+      // 1. Pull ALL data if we haven't yet
       if (!hasCheckedDynamo.value) {
-        const cached = await geminiService.listAllAffirmations();
+        const cached = await geminiService.listAllData();
         if (cached && cached.length > 0) {
-          allHistoricalAffirmations.value = cached.map(c => c.affirmation);
+          allHistoricalAffirmations.value = cached.filter(c => c.affirmation).map(c => c.affirmation as string);
+          allHistoricalJokes.value = cached.filter(c => c.joke).map(c => c.joke as string);
 
-          // Check if today exists specifically
           const todayMatch = cached.find(c => c.date === today);
           if (todayMatch) {
-            todayAffirmation.value = todayMatch.affirmation;
+            if (todayMatch.affirmation) todayAffirmation.value = todayMatch.affirmation;
+            if (todayMatch.joke) todayJoke.value = todayMatch.joke;
           }
         }
         hasCheckedDynamo.value = true;
       }
 
-      // 2. If no affirmation for today, generate, save, and update pool
-      if (!todayAffirmation.value) {
-        const response = await geminiService.generateText(prompt);
-        await geminiService.saveDailyAffirmation(today, response);
+      const todayContentRef = type === 'affirmation' ? todayAffirmation : todayJoke;
+      const historyRef = type === 'affirmation' ? allHistoricalAffirmations : allHistoricalJokes;
+      const cannedPool = type === 'affirmation' ? CANNED_AFFIRMATIONS : CANNED_JOKES;
 
-        todayAffirmation.value = response;
-        allHistoricalAffirmations.value.push(response);
+      // 2. If no content for today, generate, save, and update pool
+      if (!todayContentRef.value) {
+        const response = await geminiService.generateText(prompt);
+        await geminiService.saveDailyContent(today, type, response);
+
+        todayContentRef.value = response;
+        historyRef.value.push(response);
 
         result.value = response;
         return response;
       }
 
-      // 3. For subsequent clicks (or if today was already found during initial load):
-      // Return today's affirmation if this is the first interaction in this lifecycle,
-      // otherwise pick randomly from the growing historical pool + canned.
+      // 3. For subsequent clicks...
       if (!result.value) {
-        result.value = todayAffirmation.value;
-        return todayAffirmation.value;
+        result.value = todayContentRef.value;
+        return todayContentRef.value;
       }
 
-      const pool = [...allHistoricalAffirmations.value, ...CANNED_AFFIRMATIONS.filter(a => typeof a === 'string')];
-      const randomAff = pool[Math.floor(Math.random() * pool.length)];
-      result.value = randomAff;
-      return randomAff;
+      const pool = [...historyRef.value, ...cannedPool.filter(a => typeof a === 'string')];
+      const randomContent = pool[Math.floor(Math.random() * pool.length)];
+      result.value = randomContent;
+      return randomContent;
 
     } catch (err) {
       const message = err instanceof Error ? err : new Error(String(err));
-      logger.error("Gemini/Dynamo Request Failed. Using fallback affirmation.", message);
+      logger.error(`Gemini/Dynamo Request Failed for ${type}. Using fallback.`, message);
 
-      // Select a random fallback from canned pool ONLY
-      const pool = CANNED_AFFIRMATIONS.filter(a => typeof a === 'string');
-      const fallback = pool[Math.floor(Math.random() * pool.length)];
+      const pool = type === 'affirmation' ? CANNED_AFFIRMATIONS : CANNED_JOKES;
+      const fallback = pool[Math.floor(Math.random() * pool.length)] as string;
       result.value = fallback;
       return fallback;
     } finally {
@@ -245,29 +365,18 @@ export function useGemini() {
    * Specifically generates a pickle-themed affirmation.
    */
   async function generatePickleAffirmation() {
-    const prompt = "Generate a new affirmation.";
+    const dateStr = new Date().toISOString().split('T')[0];
+    const prompt = `Generate a new, completely unique affirmation for ${dateStr}. Do not repeat previous ones.`;
     return await generate(prompt);
   }
 
   /**
-   * specifically generates a pickle joke, completely bypassing daily caching.
+   * specifically generates a pickle joke, utilizing daily caching.
    */
   async function generateJoke() {
-    loading.value = true;
-    error.value = null;
-    try {
-      const response = await geminiService.generateText("TYPE:JOKE Generate a new joke.");
-      result.value = response;
-      return response;
-    } catch (err) {
-      const message = err instanceof Error ? err : new Error(String(err));
-      logger.error("Gemini Joke Request Failed. Using fallback joke.", message);
-      const fallback = "Why did the pickle go to the doctor? Because it was feeling a little dill!";
-      result.value = fallback;
-      return fallback;
-    } finally {
-      loading.value = false;
-    }
+    const dateStr = new Date().toISOString().split('T')[0];
+    const prompt = `TYPE:JOKE Generate a new, completely unique joke for ${dateStr}. Do not repeat previous ones.`;
+    return await generate(prompt, 'joke');
   }
 
   return {

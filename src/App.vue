@@ -23,8 +23,8 @@ function navigate(event: MouseEvent, path: string) {
       <a href="/" @click="navigate($event, '/')" :class="{ active: currentRoute === '/' }">Affirmations</a>
       <a href="/joke" @click="navigate($event, '/joke')" :class="{ active: currentRoute === '/joke' }">Jokes</a>
     </nav>
-    <PickleComponent v-if="currentRoute === '/joke'" type="joke" />
-    <PickleComponent v-else type="affirmation" />
+    <PickleComponent v-if="currentRoute === '/joke'" :key="'joke'" type="joke" />
+    <PickleComponent v-else :key="'affirmation'" type="affirmation" />
   </main>
 </template>
 

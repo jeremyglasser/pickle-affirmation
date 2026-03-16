@@ -17,7 +17,8 @@ const schema = a.schema({
   DailyAffirmation: a
     .model({
       date: a.id().required(),
-      affirmation: a.string().required(),
+      affirmation: a.string(),
+      joke: a.string(),
     })
     .identifier(['date'])
     .authorization((allow) => [allow.publicApiKey()]),
