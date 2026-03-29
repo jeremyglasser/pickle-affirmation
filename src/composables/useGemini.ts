@@ -287,6 +287,35 @@ const CANNED_JOKES = [
 ];
 
 /**
+ * Calculates a simple Jaccard similarity coefficient between two strings based on word overlap.
+ * This is useful for fuzzy matching jokes/affirmations that vary only slightly in punctuation or filler words.
+ */
+function isFuzzyDuplicate(newText: string, existingTexts: Set<string>, threshold = 0.8): boolean {
+  const getWords = (str: string) => new Set(str.toLowerCase().match(/\b\w+\b/g) || []);
+  const newWords = getWords(newText);
+  if (newWords.size === 0) return false;
+
+  for (const existingText of existingTexts) {
+    const existingWords = getWords(existingText);
+    if (existingWords.size === 0) continue;
+
+    let intersectionSize = 0;
+    for (const w of newWords) {
+      if (existingWords.has(w)) intersectionSize++;
+    }
+    
+    // Union = A + B - Intersection
+    const unionSize = newWords.size + existingWords.size - intersectionSize;
+    
+    if (unionSize > 0 && (intersectionSize / unionSize) >= threshold) {
+      return true; // Found a fuzzy duplicate
+    }
+  }
+
+  return false;
+}
+
+/**
  * Vue composable for interacting with the Gemini AI service.
  * Follows Vue 3 Composition API best practices for state management.
  */
@@ -327,7 +356,28 @@ export function useGemini() {
 
       // 2. If no content for today, generate, save, and update pool
       if (!todayContentRef.value) {
-        const response = await geminiService.generateText(prompt);
+        const allExistingContent = new Set([
+          ...allHistoricalAffirmations.value,
+          ...allHistoricalJokes.value,
+          ...CANNED_AFFIRMATIONS.filter(a => typeof a === 'string'),
+          ...CANNED_JOKES.filter(j => typeof j === 'string')
+        ]);
+
+        let response = "";
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts) {
+          response = await geminiService.generateText(prompt);
+          
+          if (!isFuzzyDuplicate(response, allExistingContent)) {
+            break; // Unique content found
+          }
+          
+          attempts++;
+          logger.warn(`Duplicate ${type} generated ("${response}"). Retrying... (Attempt ${attempts} of ${maxAttempts})`);
+        }
+
         await geminiService.saveDailyContent(today, type, response);
 
         todayContentRef.value = response;

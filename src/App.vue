@@ -28,7 +28,7 @@ const showAbout = ref(false)
     <PickleComponent v-if="currentRoute === '/joke'" :key="'joke'" type="joke" />
     <PickleComponent v-else :key="'affirmation'" type="affirmation" />
 
-    <div class="version-indicator" @click="showAbout = true">v1.1</div>
+    <div class="version-indicator" @click="showAbout = true">v1.2</div>
 
     <div v-if="showAbout" class="modal-overlay" @click="showAbout = false">
       <div class="modal-content" @click.stop>
