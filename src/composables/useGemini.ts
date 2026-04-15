@@ -2,6 +2,9 @@ import { ref } from "vue";
 import { geminiService } from "../services/geminiService";
 import { logger } from "../utils/logger";
 
+/** Number of recent entries to include in the prompt for diversity. */
+const RECENT_HISTORY_COUNT = 20;
+
 const CANNED_AFFIRMATIONS = [
   // Positive Pickle (physical cards)
   "Choose to fill your life with those who lift you higher.",
@@ -303,10 +306,10 @@ function isFuzzyDuplicate(newText: string, existingTexts: Set<string>, threshold
     for (const w of newWords) {
       if (existingWords.has(w)) intersectionSize++;
     }
-    
+
     // Union = A + B - Intersection
     const unionSize = newWords.size + existingWords.size - intersectionSize;
-    
+
     if (unionSize > 0 && (intersectionSize / unionSize) >= threshold) {
       return true; // Found a fuzzy duplicate
     }
@@ -356,27 +359,23 @@ export function useGemini() {
 
       // 2. If no content for today, generate, save, and update pool
       if (!todayContentRef.value) {
-        const allExistingContent = new Set([
-          ...allHistoricalAffirmations.value,
-          ...allHistoricalJokes.value,
-          ...CANNED_AFFIRMATIONS.filter(a => typeof a === 'string'),
-          ...CANNED_JOKES.filter(j => typeof j === 'string')
-        ]);
+        // Build recent history context for the prompt
+        const recentAffirmations = allHistoricalAffirmations.value.slice(-RECENT_HISTORY_COUNT);
+        const recentJokes = allHistoricalJokes.value.slice(-RECENT_HISTORY_COUNT);
 
-        let response = "";
-        let attempts = 0;
-        const maxAttempts = 3;
-
-        while (attempts < maxAttempts) {
-          response = await geminiService.generateText(prompt);
-          
-          if (!isFuzzyDuplicate(response, allExistingContent)) {
-            break; // Unique content found
-          }
-          
-          attempts++;
-          logger.warn(`Duplicate ${type} generated ("${response}"). Retrying... (Attempt ${attempts} of ${maxAttempts})`);
+        let historyContext = '';
+        if (recentAffirmations.length > 0) {
+          historyContext += `\n\nHere are the last ${recentAffirmations.length} affirmations that were generated. Do NOT repeat or closely rephrase any of them:\n`;
+          historyContext += recentAffirmations.map((a, i) => `${i + 1}. ${a}`).join('\n');
         }
+        if (recentJokes.length > 0) {
+          historyContext += `\n\nHere are the last ${recentJokes.length} jokes that were generated. Do NOT repeat or closely rephrase any of them:\n`;
+          historyContext += recentJokes.map((j, i) => `${i + 1}. ${j}`).join('\n');
+        }
+
+        const enrichedPrompt = prompt + historyContext;
+
+        const response = await geminiService.generateText(enrichedPrompt);
 
         await geminiService.saveDailyContent(today, type, response);
 

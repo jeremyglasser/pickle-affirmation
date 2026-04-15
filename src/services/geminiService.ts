@@ -17,7 +17,7 @@ export class GeminiService {
   async generateText(prompt: string): Promise<string> {
     try {
       const { data, errors } = await this.client.mutations.generateAffirmation({
-        prompt: prompt,
+        prompt,
       });
 
       if (errors) {
@@ -55,7 +55,7 @@ export class GeminiService {
   async saveDailyContent(date: string, property: 'affirmation' | 'joke', text: string): Promise<void> {
     try {
       const { data: existing } = await this.client.models.DailyAffirmation.get({ date });
-      
+
       if (existing) {
         await this.client.models.DailyAffirmation.update({
           date,
